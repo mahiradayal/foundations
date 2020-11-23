@@ -1,0 +1,1892 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Processing time with `pandas`\n",
+    "\n",
+    "Let's open up some data from [the Census bureau](https://www.census.gov/econ/currentdata/datasets/) - we're going to use **New Home Sales**. The data is formatted... oddly, so I've cleaned it up for you as **home-sales.csv** inside of the **data** folder.\n",
+    "\n",
+    "Open it **without moving it**. Tab autocomplete will help you."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/Users/mahiradayal/.pyenv/versions/3.8.2/lib/python3.8/site-packages/pandas/compat/__init__.py:120: UserWarning: Could not import the lzma module. Your installed Python is incomplete. Attempting to use lzma compression will result in a RuntimeError.\n",
+      "  warnings.warn(msg)\n"
+     ]
+    }
+   ],
+   "source": [
+    "import pandas as pd"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 42,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>is_adj</th>\n",
+       "      <th>val</th>\n",
+       "      <th>cat_code</th>\n",
+       "      <th>cat_desc</th>\n",
+       "      <th>cat_indent</th>\n",
+       "      <th>dt_code</th>\n",
+       "      <th>dt_desc</th>\n",
+       "      <th>dt_unit</th>\n",
+       "      <th>geo_code</th>\n",
+       "      <th>geo_desc</th>\n",
+       "      <th>per_name</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>0</td>\n",
+       "      <td>42.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>1963-01-01</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>0</td>\n",
+       "      <td>35.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>1963-02-01</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>0</td>\n",
+       "      <td>44.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>1963-03-01</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>0</td>\n",
+       "      <td>52.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>1963-04-01</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>0</td>\n",
+       "      <td>58.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>1963-05-01</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "   is_adj   val cat_code                       cat_desc  cat_indent dt_code  \\\n",
+       "0       0  42.0     SOLD  New Single-family Houses Sold           0   TOTAL   \n",
+       "1       0  35.0     SOLD  New Single-family Houses Sold           0   TOTAL   \n",
+       "2       0  44.0     SOLD  New Single-family Houses Sold           0   TOTAL   \n",
+       "3       0  52.0     SOLD  New Single-family Houses Sold           0   TOTAL   \n",
+       "4       0  58.0     SOLD  New Single-family Houses Sold           0   TOTAL   \n",
+       "\n",
+       "      dt_desc dt_unit geo_code       geo_desc    per_name  \n",
+       "0  All Houses       K       US  United States  1963-01-01  \n",
+       "1  All Houses       K       US  United States  1963-02-01  \n",
+       "2  All Houses       K       US  United States  1963-03-01  \n",
+       "3  All Houses       K       US  United States  1963-04-01  \n",
+       "4  All Houses       K       US  United States  1963-05-01  "
+      ]
+     },
+     "execution_count": 42,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df = pd.read_csv(\"home-sales.csv\")\n",
+    "df.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Creating a datetime column"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 43,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import datetime as dt"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 44,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0   1963-01-01\n",
+       "1   1963-02-01\n",
+       "2   1963-03-01\n",
+       "3   1963-04-01\n",
+       "4   1963-05-01\n",
+       "Name: datetime, dtype: datetime64[ns]"
+      ]
+     },
+     "execution_count": 44,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df['datetime'] = pd.to_datetime(df.per_name)\n",
+    "df.datetime.dropna().head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Changing the index to the datetime\n",
+    "\n",
+    "Normally the index of the column is just a number."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 45,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df = df.set_index('datetime')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "It's the column on the far left - `0`, `1`, `2`, `3`, `4`... boring and useless! If we use **.set_index** to replace the index with the datetime, though, we can start to have some fun"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 46,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>is_adj</th>\n",
+       "      <th>val</th>\n",
+       "      <th>cat_code</th>\n",
+       "      <th>cat_desc</th>\n",
+       "      <th>cat_indent</th>\n",
+       "      <th>dt_code</th>\n",
+       "      <th>dt_desc</th>\n",
+       "      <th>dt_unit</th>\n",
+       "      <th>geo_code</th>\n",
+       "      <th>geo_desc</th>\n",
+       "      <th>per_name</th>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>datetime</th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>1963-01-01</th>\n",
+       "      <td>0</td>\n",
+       "      <td>42.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>1963-01-01</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1963-02-01</th>\n",
+       "      <td>0</td>\n",
+       "      <td>35.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>1963-02-01</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1963-03-01</th>\n",
+       "      <td>0</td>\n",
+       "      <td>44.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>1963-03-01</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1963-04-01</th>\n",
+       "      <td>0</td>\n",
+       "      <td>52.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>1963-04-01</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1963-05-01</th>\n",
+       "      <td>0</td>\n",
+       "      <td>58.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>1963-05-01</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "            is_adj   val cat_code                       cat_desc  cat_indent  \\\n",
+       "datetime                                                                       \n",
+       "1963-01-01       0  42.0     SOLD  New Single-family Houses Sold           0   \n",
+       "1963-02-01       0  35.0     SOLD  New Single-family Houses Sold           0   \n",
+       "1963-03-01       0  44.0     SOLD  New Single-family Houses Sold           0   \n",
+       "1963-04-01       0  52.0     SOLD  New Single-family Houses Sold           0   \n",
+       "1963-05-01       0  58.0     SOLD  New Single-family Houses Sold           0   \n",
+       "\n",
+       "           dt_code     dt_desc dt_unit geo_code       geo_desc    per_name  \n",
+       "datetime                                                                    \n",
+       "1963-01-01   TOTAL  All Houses       K       US  United States  1963-01-01  \n",
+       "1963-02-01   TOTAL  All Houses       K       US  United States  1963-02-01  \n",
+       "1963-03-01   TOTAL  All Houses       K       US  United States  1963-03-01  \n",
+       "1963-04-01   TOTAL  All Houses       K       US  United States  1963-04-01  \n",
+       "1963-05-01   TOTAL  All Houses       K       US  United States  1963-05-01  "
+      ]
+     },
+     "execution_count": 46,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Selecting specific(-ish) dates via the index\n",
+    "\n",
+    "Now that our index is a datetime, we can select date ranges super super easily.\n",
+    "\n",
+    "### Selecting by month\n",
+    "\n",
+    "Select every row from March, 1999."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 47,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>is_adj</th>\n",
+       "      <th>val</th>\n",
+       "      <th>cat_code</th>\n",
+       "      <th>cat_desc</th>\n",
+       "      <th>cat_indent</th>\n",
+       "      <th>dt_code</th>\n",
+       "      <th>dt_desc</th>\n",
+       "      <th>dt_unit</th>\n",
+       "      <th>geo_code</th>\n",
+       "      <th>geo_desc</th>\n",
+       "      <th>per_name</th>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>datetime</th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>1999-03-01</th>\n",
+       "      <td>0</td>\n",
+       "      <td>84.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>1999-03-01</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "            is_adj   val cat_code                       cat_desc  cat_indent  \\\n",
+       "datetime                                                                       \n",
+       "1999-03-01       0  84.0     SOLD  New Single-family Houses Sold           0   \n",
+       "\n",
+       "           dt_code     dt_desc dt_unit geo_code       geo_desc    per_name  \n",
+       "datetime                                                                    \n",
+       "1999-03-01   TOTAL  All Houses       K       US  United States  1999-03-01  "
+      ]
+     },
+     "execution_count": 47,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df['1999-03']"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Selecting by year\n",
+    "\n",
+    "Select every row from 1996."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 48,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>is_adj</th>\n",
+       "      <th>val</th>\n",
+       "      <th>cat_code</th>\n",
+       "      <th>cat_desc</th>\n",
+       "      <th>cat_indent</th>\n",
+       "      <th>dt_code</th>\n",
+       "      <th>dt_desc</th>\n",
+       "      <th>dt_unit</th>\n",
+       "      <th>geo_code</th>\n",
+       "      <th>geo_desc</th>\n",
+       "      <th>per_name</th>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>datetime</th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>1996-01-01</th>\n",
+       "      <td>0</td>\n",
+       "      <td>54.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>1996-01-01</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1996-02-01</th>\n",
+       "      <td>0</td>\n",
+       "      <td>68.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>1996-02-01</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1996-03-01</th>\n",
+       "      <td>0</td>\n",
+       "      <td>70.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>1996-03-01</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1996-04-01</th>\n",
+       "      <td>0</td>\n",
+       "      <td>70.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>1996-04-01</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1996-05-01</th>\n",
+       "      <td>0</td>\n",
+       "      <td>69.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>1996-05-01</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1996-06-01</th>\n",
+       "      <td>0</td>\n",
+       "      <td>65.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>1996-06-01</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1996-07-01</th>\n",
+       "      <td>0</td>\n",
+       "      <td>66.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>1996-07-01</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1996-08-01</th>\n",
+       "      <td>0</td>\n",
+       "      <td>73.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>1996-08-01</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1996-09-01</th>\n",
+       "      <td>0</td>\n",
+       "      <td>62.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>1996-09-01</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1996-10-01</th>\n",
+       "      <td>0</td>\n",
+       "      <td>56.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>1996-10-01</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1996-11-01</th>\n",
+       "      <td>0</td>\n",
+       "      <td>54.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>1996-11-01</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1996-12-01</th>\n",
+       "      <td>0</td>\n",
+       "      <td>51.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>1996-12-01</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "            is_adj   val cat_code                       cat_desc  cat_indent  \\\n",
+       "datetime                                                                       \n",
+       "1996-01-01       0  54.0     SOLD  New Single-family Houses Sold           0   \n",
+       "1996-02-01       0  68.0     SOLD  New Single-family Houses Sold           0   \n",
+       "1996-03-01       0  70.0     SOLD  New Single-family Houses Sold           0   \n",
+       "1996-04-01       0  70.0     SOLD  New Single-family Houses Sold           0   \n",
+       "1996-05-01       0  69.0     SOLD  New Single-family Houses Sold           0   \n",
+       "1996-06-01       0  65.0     SOLD  New Single-family Houses Sold           0   \n",
+       "1996-07-01       0  66.0     SOLD  New Single-family Houses Sold           0   \n",
+       "1996-08-01       0  73.0     SOLD  New Single-family Houses Sold           0   \n",
+       "1996-09-01       0  62.0     SOLD  New Single-family Houses Sold           0   \n",
+       "1996-10-01       0  56.0     SOLD  New Single-family Houses Sold           0   \n",
+       "1996-11-01       0  54.0     SOLD  New Single-family Houses Sold           0   \n",
+       "1996-12-01       0  51.0     SOLD  New Single-family Houses Sold           0   \n",
+       "\n",
+       "           dt_code     dt_desc dt_unit geo_code       geo_desc    per_name  \n",
+       "datetime                                                                    \n",
+       "1996-01-01   TOTAL  All Houses       K       US  United States  1996-01-01  \n",
+       "1996-02-01   TOTAL  All Houses       K       US  United States  1996-02-01  \n",
+       "1996-03-01   TOTAL  All Houses       K       US  United States  1996-03-01  \n",
+       "1996-04-01   TOTAL  All Houses       K       US  United States  1996-04-01  \n",
+       "1996-05-01   TOTAL  All Houses       K       US  United States  1996-05-01  \n",
+       "1996-06-01   TOTAL  All Houses       K       US  United States  1996-06-01  \n",
+       "1996-07-01   TOTAL  All Houses       K       US  United States  1996-07-01  \n",
+       "1996-08-01   TOTAL  All Houses       K       US  United States  1996-08-01  \n",
+       "1996-09-01   TOTAL  All Houses       K       US  United States  1996-09-01  \n",
+       "1996-10-01   TOTAL  All Houses       K       US  United States  1996-10-01  \n",
+       "1996-11-01   TOTAL  All Houses       K       US  United States  1996-11-01  \n",
+       "1996-12-01   TOTAL  All Houses       K       US  United States  1996-12-01  "
+      ]
+     },
+     "execution_count": 48,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df['1996']"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## List slices with datetimes\n",
+    "\n",
+    "Just for review, you can use `:` to only select certain parts of a list. This is called **list slicing**."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 49,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Make our list of fruits\n",
+    "ranked_fruits = ('banana', 'orange', 'apple', 'blueberries', 'strawberries')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 50,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "('banana', 'orange')"
+      ]
+     },
+     "execution_count": 50,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Start from the beginning, get the first two\n",
+    "ranked_fruits[:2]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 51,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "('apple', 'blueberries')"
+      ]
+     },
+     "execution_count": 51,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Start from two, get up until the fourth element\n",
+    "ranked_fruits[2:4]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 52,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "('blueberries', 'strawberries')"
+      ]
+     },
+     "execution_count": 52,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Starting from the third element, get all the rest\n",
+    "ranked_fruits[3:]"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Instead of using boring ol' numbers, we can use **dates instead**."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Getting rows after a certain date\n",
+    "\n",
+    "Select everything *after* March 3rd, 1999."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 53,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>is_adj</th>\n",
+       "      <th>val</th>\n",
+       "      <th>cat_code</th>\n",
+       "      <th>cat_desc</th>\n",
+       "      <th>cat_indent</th>\n",
+       "      <th>dt_code</th>\n",
+       "      <th>dt_desc</th>\n",
+       "      <th>dt_unit</th>\n",
+       "      <th>geo_code</th>\n",
+       "      <th>geo_desc</th>\n",
+       "      <th>per_name</th>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>datetime</th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>1999-03-01</th>\n",
+       "      <td>0</td>\n",
+       "      <td>84.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>1999-03-01</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1999-04-01</th>\n",
+       "      <td>0</td>\n",
+       "      <td>86.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>1999-04-01</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1999-05-01</th>\n",
+       "      <td>0</td>\n",
+       "      <td>80.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>1999-05-01</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1999-06-01</th>\n",
+       "      <td>0</td>\n",
+       "      <td>82.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>1999-06-01</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1999-07-01</th>\n",
+       "      <td>0</td>\n",
+       "      <td>78.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>1999-07-01</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>...</th>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2016-01-01</th>\n",
+       "      <td>0</td>\n",
+       "      <td>39.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>2016-01-01</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2016-02-01</th>\n",
+       "      <td>0</td>\n",
+       "      <td>45.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>2016-02-01</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2016-03-01</th>\n",
+       "      <td>0</td>\n",
+       "      <td>49.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>2016-03-01</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2016-04-01</th>\n",
+       "      <td>0</td>\n",
+       "      <td>57.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>2016-04-01</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2016-05-01</th>\n",
+       "      <td>0</td>\n",
+       "      <td>51.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>2016-05-01</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "<p>207 rows × 11 columns</p>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "            is_adj   val cat_code                       cat_desc  cat_indent  \\\n",
+       "datetime                                                                       \n",
+       "1999-03-01       0  84.0     SOLD  New Single-family Houses Sold           0   \n",
+       "1999-04-01       0  86.0     SOLD  New Single-family Houses Sold           0   \n",
+       "1999-05-01       0  80.0     SOLD  New Single-family Houses Sold           0   \n",
+       "1999-06-01       0  82.0     SOLD  New Single-family Houses Sold           0   \n",
+       "1999-07-01       0  78.0     SOLD  New Single-family Houses Sold           0   \n",
+       "...            ...   ...      ...                            ...         ...   \n",
+       "2016-01-01       0  39.0     SOLD  New Single-family Houses Sold           0   \n",
+       "2016-02-01       0  45.0     SOLD  New Single-family Houses Sold           0   \n",
+       "2016-03-01       0  49.0     SOLD  New Single-family Houses Sold           0   \n",
+       "2016-04-01       0  57.0     SOLD  New Single-family Houses Sold           0   \n",
+       "2016-05-01       0  51.0     SOLD  New Single-family Houses Sold           0   \n",
+       "\n",
+       "           dt_code     dt_desc dt_unit geo_code       geo_desc    per_name  \n",
+       "datetime                                                                    \n",
+       "1999-03-01   TOTAL  All Houses       K       US  United States  1999-03-01  \n",
+       "1999-04-01   TOTAL  All Houses       K       US  United States  1999-04-01  \n",
+       "1999-05-01   TOTAL  All Houses       K       US  United States  1999-05-01  \n",
+       "1999-06-01   TOTAL  All Houses       K       US  United States  1999-06-01  \n",
+       "1999-07-01   TOTAL  All Houses       K       US  United States  1999-07-01  \n",
+       "...            ...         ...     ...      ...            ...         ...  \n",
+       "2016-01-01   TOTAL  All Houses       K       US  United States  2016-01-01  \n",
+       "2016-02-01   TOTAL  All Houses       K       US  United States  2016-02-01  \n",
+       "2016-03-01   TOTAL  All Houses       K       US  United States  2016-03-01  \n",
+       "2016-04-01   TOTAL  All Houses       K       US  United States  2016-04-01  \n",
+       "2016-05-01   TOTAL  All Houses       K       US  United States  2016-05-01  \n",
+       "\n",
+       "[207 rows x 11 columns]"
+      ]
+     },
+     "execution_count": 53,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df['1999-03':]"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Getting rows between a certain date\n",
+    "\n",
+    "Select everything *before* July 9th, 1987."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 54,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>is_adj</th>\n",
+       "      <th>val</th>\n",
+       "      <th>cat_code</th>\n",
+       "      <th>cat_desc</th>\n",
+       "      <th>cat_indent</th>\n",
+       "      <th>dt_code</th>\n",
+       "      <th>dt_desc</th>\n",
+       "      <th>dt_unit</th>\n",
+       "      <th>geo_code</th>\n",
+       "      <th>geo_desc</th>\n",
+       "      <th>per_name</th>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>datetime</th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>1963-01-01</th>\n",
+       "      <td>0</td>\n",
+       "      <td>42.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>1963-01-01</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1963-02-01</th>\n",
+       "      <td>0</td>\n",
+       "      <td>35.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>1963-02-01</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1963-03-01</th>\n",
+       "      <td>0</td>\n",
+       "      <td>44.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>1963-03-01</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1963-04-01</th>\n",
+       "      <td>0</td>\n",
+       "      <td>52.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>1963-04-01</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1963-05-01</th>\n",
+       "      <td>0</td>\n",
+       "      <td>58.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>1963-05-01</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>...</th>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1987-03-01</th>\n",
+       "      <td>0</td>\n",
+       "      <td>73.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>1987-03-01</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1987-04-01</th>\n",
+       "      <td>0</td>\n",
+       "      <td>72.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>1987-04-01</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1987-05-01</th>\n",
+       "      <td>0</td>\n",
+       "      <td>62.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>1987-05-01</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1987-06-01</th>\n",
+       "      <td>0</td>\n",
+       "      <td>58.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>1987-06-01</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1987-07-01</th>\n",
+       "      <td>0</td>\n",
+       "      <td>55.0</td>\n",
+       "      <td>SOLD</td>\n",
+       "      <td>New Single-family Houses Sold</td>\n",
+       "      <td>0</td>\n",
+       "      <td>TOTAL</td>\n",
+       "      <td>All Houses</td>\n",
+       "      <td>K</td>\n",
+       "      <td>US</td>\n",
+       "      <td>United States</td>\n",
+       "      <td>1987-07-01</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "<p>295 rows × 11 columns</p>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "            is_adj   val cat_code                       cat_desc  cat_indent  \\\n",
+       "datetime                                                                       \n",
+       "1963-01-01       0  42.0     SOLD  New Single-family Houses Sold           0   \n",
+       "1963-02-01       0  35.0     SOLD  New Single-family Houses Sold           0   \n",
+       "1963-03-01       0  44.0     SOLD  New Single-family Houses Sold           0   \n",
+       "1963-04-01       0  52.0     SOLD  New Single-family Houses Sold           0   \n",
+       "1963-05-01       0  58.0     SOLD  New Single-family Houses Sold           0   \n",
+       "...            ...   ...      ...                            ...         ...   \n",
+       "1987-03-01       0  73.0     SOLD  New Single-family Houses Sold           0   \n",
+       "1987-04-01       0  72.0     SOLD  New Single-family Houses Sold           0   \n",
+       "1987-05-01       0  62.0     SOLD  New Single-family Houses Sold           0   \n",
+       "1987-06-01       0  58.0     SOLD  New Single-family Houses Sold           0   \n",
+       "1987-07-01       0  55.0     SOLD  New Single-family Houses Sold           0   \n",
+       "\n",
+       "           dt_code     dt_desc dt_unit geo_code       geo_desc    per_name  \n",
+       "datetime                                                                    \n",
+       "1963-01-01   TOTAL  All Houses       K       US  United States  1963-01-01  \n",
+       "1963-02-01   TOTAL  All Houses       K       US  United States  1963-02-01  \n",
+       "1963-03-01   TOTAL  All Houses       K       US  United States  1963-03-01  \n",
+       "1963-04-01   TOTAL  All Houses       K       US  United States  1963-04-01  \n",
+       "1963-05-01   TOTAL  All Houses       K       US  United States  1963-05-01  \n",
+       "...            ...         ...     ...      ...            ...         ...  \n",
+       "1987-03-01   TOTAL  All Houses       K       US  United States  1987-03-01  \n",
+       "1987-04-01   TOTAL  All Houses       K       US  United States  1987-04-01  \n",
+       "1987-05-01   TOTAL  All Houses       K       US  United States  1987-05-01  \n",
+       "1987-06-01   TOTAL  All Houses       K       US  United States  1987-06-01  \n",
+       "1987-07-01   TOTAL  All Houses       K       US  United States  1987-07-01  \n",
+       "\n",
+       "[295 rows x 11 columns]"
+      ]
+     },
+     "execution_count": 54,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df[:'1987-07-09']"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Info on our time series\n",
+    "\n",
+    "If you try to `.plot`, pandas will automatically use the index (the date) as the x axis for you. This makes like **perfect.** because you don't have to think about anything, and calculations automatically have a good axis.\n",
+    "\n",
+    "Graph the number of home sales over time."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 55,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "<AxesSubplot:xlabel='datetime'>"
+      ]
+     },
+     "execution_count": 55,
+     "metadata": {},
+     "output_type": "execute_result"
+    },
+    {
+     "data": {
+      "image/png": "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\n",
+      "text/plain": [
+       "<Figure size 432x288 with 1 Axes>"
+      ]
+     },
+     "metadata": {
+      "needs_background": "light"
+     },
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "df.resample('3M').val.sum().plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Grouping with resample, not with groupby"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Hmmm, looks like something bad might have happened to the housing industry t some point. Maybe we want to see some numbers instead of a graph? To do aggregate statistics on time series in pandas we use a method called `.resample()`, and we're going to tell it **to group the data by year.**\n",
+    "\n",
+    "When we tell it to group by year, we need to give it a **special code**. I always get mine from this StackOverflow post http://stackoverflow.com/a/17001474 because it's much more convenient than the pandas documentation.\n",
+    "\n",
+    "Get the total number of house sales by year.\n",
+    "\n",
+    "*Note: if we didn't have a datetime index, we would use `on='colname'` to specify the column we're resampling on*"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 56,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "datetime\n",
+       "1963-12-31     560.0\n",
+       "1964-12-31     565.0\n",
+       "1965-12-31     575.0\n",
+       "1966-12-31     461.0\n",
+       "1967-12-31     488.0\n",
+       "1968-12-31     490.0\n",
+       "1969-12-31     449.0\n",
+       "1970-12-31     486.0\n",
+       "1971-12-31     657.0\n",
+       "1972-12-31     718.0\n",
+       "1973-12-31     633.0\n",
+       "1974-12-31     519.0\n",
+       "1975-12-31     550.0\n",
+       "1976-12-31     647.0\n",
+       "1977-12-31     820.0\n",
+       "1978-12-31     818.0\n",
+       "1979-12-31     709.0\n",
+       "1980-12-31     545.0\n",
+       "1981-12-31     436.0\n",
+       "1982-12-31     413.0\n",
+       "1983-12-31     622.0\n",
+       "1984-12-31     639.0\n",
+       "1985-12-31     688.0\n",
+       "1986-12-31     748.0\n",
+       "1987-12-31     672.0\n",
+       "1988-12-31     675.0\n",
+       "1989-12-31     650.0\n",
+       "1990-12-31     535.0\n",
+       "1991-12-31     507.0\n",
+       "1992-12-31     608.0\n",
+       "1993-12-31     666.0\n",
+       "1994-12-31     670.0\n",
+       "1995-12-31     665.0\n",
+       "1996-12-31     758.0\n",
+       "1997-12-31     805.0\n",
+       "1998-12-31     885.0\n",
+       "1999-12-31     881.0\n",
+       "2000-12-31     877.0\n",
+       "2001-12-31     909.0\n",
+       "2002-12-31     972.0\n",
+       "2003-12-31    1088.0\n",
+       "2004-12-31    1203.0\n",
+       "2005-12-31    1283.0\n",
+       "2006-12-31    1052.0\n",
+       "2007-12-31     776.0\n",
+       "2008-12-31     485.0\n",
+       "2009-12-31     374.0\n",
+       "2010-12-31     322.0\n",
+       "2011-12-31     305.0\n",
+       "2012-12-31     369.0\n",
+       "2013-12-31     429.0\n",
+       "2014-12-31     439.0\n",
+       "2015-12-31     501.0\n",
+       "2016-12-31     241.0\n",
+       "Freq: A-DEC, Name: val, dtype: float64"
+      ]
+     },
+     "execution_count": 56,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df.resample('1Y').val.sum()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Notice that it's **December of every year**. That still looks like too much data, though. What if we zoom out to **every decade** instead?"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 57,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "datetime\n",
+       "1963-12-31     560.0\n",
+       "1973-12-31    5522.0\n",
+       "1983-12-31    6079.0\n",
+       "1993-12-31    6388.0\n",
+       "2003-12-31    8510.0\n",
+       "2013-12-31    6598.0\n",
+       "2023-12-31    1181.0\n",
+       "Freq: 10A-DEC, Name: val, dtype: float64"
+      ]
+     },
+     "execution_count": 57,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df.resample('10Y').val.sum()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Cool, right?"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Graphing\n",
+    "\n",
+    "We can graph these instead of just look at them! Plot all of our years of housing sales, by decade.\n",
+    "\n",
+    "*Note: What is the best kind of graph for this?*"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 58,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "<AxesSubplot:ylabel='datetime'>"
+      ]
+     },
+     "execution_count": 58,
+     "metadata": {},
+     "output_type": "execute_result"
+    },
+    {
+     "data": {
+      "image/png": "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\n",
+      "text/plain": [
+       "<Figure size 432x288 with 1 Axes>"
+      ]
+     },
+     "metadata": {
+      "needs_background": "light"
+     },
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "df.resample('10Y').val.sum().plot(kind='barh')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Cyclical data (actually using groupby)\n",
+    "\n",
+    "### What were the top 5 worst months?\n",
+    "\n",
+    "Start by just simply sorting the dataset to find the top five months that were worst for home sales."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 78,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "month\n",
+       "12    42.792453\n",
+       "11    45.471698\n",
+       "1     47.685185\n",
+       "10    51.584906\n",
+       "9     52.037736\n",
+       "Name: val, dtype: float64"
+      ]
+     },
+     "execution_count": 78,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# I jumped the gun here and started off with a complicated method of what we simplified below. \n",
+    "df_month = df.reset_index()\n",
+    "df_month['month'] = pd.DatetimeIndex(df_month['datetime']).month\n",
+    "df_month.groupby('month').val.mean().sort_values().head(5)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "It seems like there might be a cycle ever year. Maybe houses are sold in the summer and not the winter? To do this we can't use resample - it's for putting time into buckets - we need to **group by the month.**\n",
+    "\n",
+    "### Getting the month"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We can't ask for the index column as \"year\" any more, but we can just use `df.index` instead. Look at the date by typing `df.index`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 73,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "DatetimeIndex(['1963-01-01', '1963-02-01', '1963-03-01', '1963-04-01',\n",
+       "               '1963-05-01', '1963-06-01', '1963-07-01', '1963-08-01',\n",
+       "               '1963-09-01', '1963-10-01',\n",
+       "               ...\n",
+       "               '2015-08-01', '2015-09-01', '2015-10-01', '2015-11-01',\n",
+       "               '2015-12-01', '2016-01-01', '2016-02-01', '2016-03-01',\n",
+       "               '2016-04-01', '2016-05-01'],\n",
+       "              dtype='datetime64[ns]', name='datetime', length=641, freq=None)"
+      ]
+     },
+     "execution_count": 73,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df.index"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "To get the month of each date, it's simply `df.index.month`. If it were a column we would use `df.col_name.dt.month`. Why do we only have to use `.dt` when it's a normal column, and not when it's an index? **I have no idea.**\n",
+    "\n",
+    "Look at the month of each row with `df.index.month`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 74,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "Int64Index([ 1,  2,  3,  4,  5,  6,  7,  8,  9, 10,\n",
+       "            ...\n",
+       "             8,  9, 10, 11, 12,  1,  2,  3,  4,  5],\n",
+       "           dtype='int64', name='datetime', length=641)"
+      ]
+     },
+     "execution_count": 74,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df.index.month"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Doing the groupby to view data by month\n",
+    "\n",
+    "So when we do our groupby, we'll say **hey, we made the groups for you already**. Then we ask for the median number of houses sold. Find the mean number of houses sold each month by using `.groupby(by=df.index.month)`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 79,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "datetime\n",
+       "1     47.685185\n",
+       "2     53.592593\n",
+       "3     62.685185\n",
+       "4     61.444444\n",
+       "5     61.129630\n",
+       "6     59.188679\n",
+       "7     56.735849\n",
+       "8     57.566038\n",
+       "9     52.037736\n",
+       "10    51.584906\n",
+       "11    45.471698\n",
+       "12    42.792453\n",
+       "Name: val, dtype: float64"
+      ]
+     },
+     "execution_count": 79,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df.groupby(by=df.index.month).val.mean()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Plot the results"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 85,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "<AxesSubplot:ylabel='datetime'>"
+      ]
+     },
+     "execution_count": 85,
+     "metadata": {},
+     "output_type": "execute_result"
+    },
+    {
+     "data": {
+      "image/png": "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\n",
+      "text/plain": [
+       "<Figure size 432x288 with 1 Axes>"
+      ]
+     },
+     "metadata": {
+      "needs_background": "light"
+     },
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "df.groupby(by=df.index.month).val.mean().plot(kind='barh')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# More details\n",
+    "\n",
+    "You can also use **max** and **min** and all of your other aggregate friends with `.resample`. For example, what's the **largest number of houses hold in a given year?**"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 83,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "datetime\n",
+       "2005    127.0\n",
+       "Name: val, dtype: float64"
+      ]
+     },
+     "execution_count": 83,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df.groupby(by=df.index.year).val.agg('max').sort_values(ascending=False).head(1)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "How about the fewest?"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 84,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "datetime\n",
+       "2005    86.0\n",
+       "Name: val, dtype: float64"
+      ]
+     },
+     "execution_count": 84,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df.groupby(by=df.index.year).val.agg('min').sort_values(ascending=False).head(1)"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.2"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 1
+}
